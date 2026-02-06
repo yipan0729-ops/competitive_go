@@ -1,0 +1,15 @@
+.env
+*.db
+storage/
+reports/
+data/
+*.log
+*.exe
+*.test
+*.out
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
