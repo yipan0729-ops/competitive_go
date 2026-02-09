@@ -417,13 +417,319 @@ storage/
 
 ---
 
-### 3.2 批量爬取（规划中）
+### 3.2 批量爬取（新功能）
 
 **接口**: `POST /api/crawl/batch`
 
-**说明**: 批量爬取多个URL
+**说明**: 批量爬取多个URL，支持并发控制
 
-**状态**: 🚧 开发中
+**请求参数**:
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| urls | array | ✅ | URL列表 |
+| concurrent | int | ❌ | 并发数量（默认：3，最大：10） |
+
+**URL项格式**:
+
+```json
+{
+  "url": "https://example.com",
+  "competitor": "竞品名称",
+  "source_type": "官网"
+}
+```
+
+**请求示例**:
+
+```powershell
+$body = @{
+    urls = @(
+        @{
+            url = "https://www.notion.so"
+            competitor = "Notion"
+            source_type = "官网"
+        },
+        @{
+            url = "https://www.notion.so/pricing"
+            competitor = "Notion"
+            source_type = "定价页"
+        },
+        @{
+            url = "https://www.feishu.cn"
+            competitor = "飞书"
+            source_type = "官网"
+        }
+    )
+    concurrent = 3
+} | ConvertTo-Json -Depth 5
+
+Invoke-WebRequest -Uri http://localhost:8080/api/crawl/batch `
+    -Method POST `
+    -Body $body `
+    -ContentType "application/json" `
+    -UseBasicParsing
+```
+
+**响应示例**:
+
+```json
+{
+  "success": true,
+  "total_urls": 3,
+  "concurrent": 3,
+  "message": "批量爬取任务已启动"
+}
+```
+
+**特点**:
+- ✅ 异步处理，立即返回
+- ✅ 并发控制，避免请求过多
+- ✅ 自动保存到数据库
+- ✅ 支持大批量爬取
+
+---
+
+## 4. AI分析
+
+使用LLM对竞品进行智能分析
+
+---
+
+### 4.1 分析单个竞品
+
+**接口**: `POST /api/analyze/competitor`
+
+**说明**: 提取产品信息并进行SWOT分析
+
+**请求参数**:
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| competitor_id | int | ✅ | 竞品ID |
+| market_context | string | ❌ | 市场背景信息 |
+
+**请求示例**:
+
+```powershell
+$body = @{
+    competitor_id = 1
+    market_context = "中国在线协作文档市场"
+} | ConvertTo-Json
+
+Invoke-WebRequest -Uri http://localhost:8080/api/analyze/competitor `
+    -Method POST `
+    -Body $body `
+    -ContentType "application/json" `
+    -UseBasicParsing
+```
+
+**响应示例**:
+
+```json
+{
+  "success": true,
+  "competitor": "Notion",
+  "product_info": {
+    "product_name": "Notion",
+    "company": "Notion Labs Inc.",
+    "tagline": "All-in-one workspace",
+    "target_users": ["知识工作者", "创作者", "团队"],
+    "core_features": [
+      {
+        "name": "笔记与文档",
+        "description": "强大的编辑器",
+        "category": "核心功能",
+        "unique": false
+      }
+    ],
+    "pricing": {
+      "model": "订阅制",
+      "tiers": [
+        {
+          "name": "Free",
+          "price": 0,
+          "billing_cycle": "月付",
+          "features": ["个人使用"],
+          "limitations": ["有限制"]
+        }
+      ]
+    }
+  },
+  "swot_analysis": {
+    "strengths": [
+      {
+        "point": "功能全面",
+        "evidence": "集成了多种工具",
+        "impact": "高"
+      }
+    ],
+    "weaknesses": [...],
+    "opportunities": [...],
+    "threats": [...]
+  }
+}
+```
+
+---
+
+## 5. 报告生成
+
+生成专业的竞品分析报告
+
+---
+
+### 5.1 生成报告
+
+**接口**: `POST /api/report/generate`
+
+**说明**: 根据分析结果生成Markdown格式报告
+
+**请求参数**:
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| competitor_ids | array | ✅ | 竞品ID列表 |
+| topic | string | ✅ | 分析主题 |
+| report_name | string | ❌ | 报告名称（默认自动生成） |
+
+**请求示例**:
+
+```powershell
+$body = @{
+    competitor_ids = @(1, 2, 3)
+    topic = "AI创作"
+    report_name = "AI创作竞品分析"
+} | ConvertTo-Json
+
+Invoke-WebRequest -Uri http://localhost:8080/api/report/generate `
+    -Method POST `
+    -Body $body `
+    -ContentType "application/json" `
+    -UseBasicParsing
+```
+
+**响应示例**:
+
+```json
+{
+  "success": true,
+  "report_id": 1,
+  "report_name": "Notion竞品分析",
+  "report_path": "reports/Notion竞品分析.md",
+  "competitors": 3
+}
+```
+
+**报告内容包括**:
+- 📊 执行摘要
+- 🏢 竞品概览
+- ⚙️ 功能对比矩阵
+- 💰 价格策略分析
+- 📈 SWOT分析
+- 💡 战略建议
+- 📎 数据来源附录
+
+---
+
+## 6. 全流程自动化 🔥
+
+**一键完成**从发现到报告的全部流程！
+
+---
+
+### 6.1 自动化分析
+
+**接口**: `POST /api/auto/analysis`
+
+**说明**: 输入主题后自动完成：发现竞品 → 爬取内容 → AI分析 → 生成报告
+
+**请求参数**:
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| topic | string | ✅ | - | 分析主题 |
+| market | string | ❌ | - | 目标市场 |
+| competitor_count | int | ❌ | 5 | 竞品数量 |
+| depth | string | ❌ | standard | 搜索深度（quick/standard/deep） |
+| auto_crawl | bool | ❌ | true | 是否自动爬取 |
+| auto_analyze | bool | ❌ | true | 是否自动分析 |
+| generate_report | bool | ❌ | true | 是否生成报告 |
+
+**请求示例**:
+
+```powershell
+$body = @{
+    topic = "扣子空间AI创作"
+    market = "中国"
+    competitor_count = 1
+    depth = "standard"
+    auto_crawl = $true
+    auto_analyze = $true
+    generate_report = $true
+} | ConvertTo-Json
+
+Invoke-WebRequest -Uri http://localhost:8080/api/auto/analysis `
+    -Method POST `
+    -Body $body `
+    -ContentType "application/json" `
+    -UseBasicParsing
+```
+
+**响应示例**:
+
+```json
+{
+  "success": true,
+  "task_id": 1,
+  "status": "processing",
+  "workflow": "discovery -> crawl -> analysis -> report",
+  "estimated_time": 300
+}
+```
+
+**工作流程**:
+
+```
+1. 发现竞品 (10%) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   └─ 搜索相关文章和产品
+   
+2. 搜索数据源 (40%) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   └─ 为每个竞品找官网、定价页等
+   
+3. 批量爬取 (60%) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   └─ 并发爬取所有URL
+   
+4. AI分析 (80%) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   └─ 提取产品信息 + SWOT分析
+   
+5. 生成报告 (95%) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   └─ 生成Markdown报告
+   
+6. 完成 (100%) ✅
+```
+
+**查询进度**:
+
+```powershell
+# 使用之前的状态查询接口
+Invoke-WebRequest -Uri http://localhost:8080/api/discover/status/1 -UseBasicParsing
+```
+
+**结果示例**:
+
+```json
+{
+  "status": "completed",
+  "progress": 100,
+  "result": {
+    "competitors": ["Notion", "飞书", "钉钉", "Teambition", "Worktile"],
+    "urls_crawled": 15,
+    "analyzed_count": 5,
+    "report_path": "reports/项目管理工具_自动分析报告_20260209_103045.md"
+  }
+}
+```
 
 ---
 

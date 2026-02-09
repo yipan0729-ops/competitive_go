@@ -63,9 +63,7 @@ func main() {
 		crawl := api.Group("/crawl")
 		{
 			crawl.POST("/single", crawlHandler.CrawlSingle)
-			// TODO: 实现批量爬取
-			// crawl.POST("/batch", crawlHandler.CrawlBatch)
-			// crawl.GET("/status/:task_id", crawlHandler.GetCrawlStatus)
+			crawl.POST("/batch", crawlHandler.CrawlBatch) // 批量爬取
 		}
 
 		// 竞品管理
@@ -73,35 +71,28 @@ func main() {
 		{
 			competitors.GET("", handlers.GetCompetitors)
 			competitors.GET("/:id/sources", handlers.GetDataSources)
-			// TODO: 实现更多竞品管理接口
 		}
 
-		// 分析模块
-		// TODO: 实现AI分析接口
-		// analyze := api.Group("/analyze")
-		// {
-		//     analyze.POST("/extract", analyzeHandler.Extract)
-		//     analyze.POST("/compare", analyzeHandler.Compare)
-		//     analyze.POST("/swot", analyzeHandler.GenerateSWOT)
-		// }
+		// AI分析模块
+		analysisHandler := handlers.NewAnalysisHandler()
+		analyze := api.Group("/analyze")
+		{
+			analyze.POST("/competitor", analysisHandler.AnalyzeCompetitor)
+		}
 
 		// 报告模块
-		// TODO: 实现报告生成接口
-		// report := api.Group("/report")
-		// {
-		//     report.POST("/generate", reportHandler.Generate)
-		//     report.GET("/:id", reportHandler.Get)
-		//     report.GET("/export/:id", reportHandler.Export)
-		// }
+		reportHandler := handlers.NewReportHandler()
+		reportAPI := api.Group("/report")
+		{
+			reportAPI.POST("/generate", reportHandler.GenerateReport)
+		}
 
-		// 监控模块
-		// TODO: 实现监控接口
-		// monitor := api.Group("/monitor")
-		// {
-		//     monitor.POST("/create", monitorHandler.Create)
-		//     monitor.GET("/changes", monitorHandler.GetChanges)
-		//     monitor.GET("/dashboard", monitorHandler.Dashboard)
-		// }
+		// 全流程自动化
+		automationHandler := handlers.NewAutomationHandler()
+		auto := api.Group("/auto")
+		{
+			auto.POST("/analysis", automationHandler.AutoAnalysis) // 一键分析
+		}
 	}
 
 	// 启动服务器

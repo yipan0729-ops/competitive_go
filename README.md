@@ -1,6 +1,24 @@
-# 自动化竞品调研工具
+# 自动化竞品调研工具 v2.0 🚀
 
-基于 Go + Gin 框架开发的自动化竞品分析工具，支持智能数据源发现、自动化数据采集、AI分析和报告生成。
+> **一键完成竞品分析！从输入主题到生成报告，只需5分钟！**
+
+基于 Go + Gin 框架开发的全自动化竞品分析工具，支持智能数据源发现、批量数据采集、AI智能分析和专业报告生成。
+
+## ✨ v2.0 重大更新
+
+### 🔥 全流程自动化
+- **一个API调用完成所有步骤**
+- 自动发现竞品 → 批量爬取 → AI分析 → 生成报告
+- 5分钟获得完整分析报告
+- 零人工干预
+
+### 🆕 新增功能
+- ✅ **批量爬取** - 一次爬取多个URL，支持并发控制
+- ✅ **AI智能分析** - 自动提取产品信息和SWOT分析
+- ✅ **报告自动生成** - 专业Markdown格式报告
+- ✅ **全流程自动化** - 一键完成所有步骤
+
+---
 
 ## 功能特性
 
@@ -10,7 +28,11 @@
 - 智能链接分类和质量评分
 - 搜索结果缓存优化
 
-### 2. 数据采集
+### 2. 高效数据采集 ⚡
+- **批量并发爬取** 🆕
+  - 支持1-10个并发
+  - 异步执行，立即返回
+  - 自动错误处理
 - **三层策略自动降级**
   - Firecrawl (AI驱动，首选)
   - Jina Reader (免费，备选)
@@ -19,41 +41,72 @@
 - 自动下载并本地化图片
 - Markdown格式保存
 
-### 3. AI分析
-- 竞品信息智能提取
-- 产品功能、价格策略分析
-- SWOT自动生成
-- 多维度对比分析
+### 3. AI智能分析 🤖 🆕
+- **产品信息提取**
+  - 公司信息、产品定位
+  - 目标用户群体
+  - 核心功能列表
+  - 价格策略分析
+- **SWOT自动分析**
+  - 优势/劣势/机会/威胁
+  - 证据支持
+  - 影响评估
+  - 战略建议
+- **支持多种LLM**
+  - Ollama（本地，免费）⭐ 推荐
+  - OpenAI
+  - DeepSeek
+  - Groq
+  - 智谱AI、通义千问
 
-### 4. 报告生成
+### 4. 专业报告生成 📊 🆕
 - 完整的Markdown报告
 - 功能对比矩阵
-- 价格策略分析
+- 价格策略分析表
+- 完整SWOT分析
 - 战略建议输出
-- 支持多格式导出（TODO）
+- 数据来源附录
 
 ### 5. 数据管理
-- SQLite数据库存储
+- SQLite数据库存储（纯Go驱动，无需CGO）
 - 历史数据追踪
 - 内容变化检测
-- 监控预警（TODO）
-
-## 技术栈
-
-- **后端**: Go 1.21+ / Gin
-- **数据库**: SQLite / GORM
-- **爬虫**: Firecrawl API / Jina Reader / Playwright
-- **搜索**: Serper API / Google Custom Search / Bing Search
-- **AI**: OpenAI GPT-4 / Claude / DeepSeek
-- **存储**: 文件系统（Markdown + 图片）
+- 监控预警（v3.0计划）
 
 ## 快速开始
+
+### 🎯 最简单方式 - 一键自动化（推荐）
+
+```powershell
+# 1. 启动服务
+go run main.go
+
+# 2. 运行自动化分析（只需这一个命令！）
+$body = @{topic="项目管理工具"} | ConvertTo-Json
+Invoke-WebRequest -Uri http://localhost:8080/api/auto/analysis `
+    -Method POST -Body $body -ContentType "application/json" -UseBasicParsing
+
+# 3. 等待5分钟，查看报告
+ls reports/
+```
+
+**就这么简单！系统会自动**:
+- ✅ 发现5个竞品
+- ✅ 搜索15个数据源
+- ✅ 批量爬取所有网页
+- ✅ AI提取产品信息
+- ✅ 生成SWOT分析
+- ✅ 输出完整报告
+
+---
+
+### 📋 传统方式 - 完整设置
 
 ### 1. 环境要求
 
 - Go 1.21+ （已测试：1.21、1.22、1.23、1.24）
-- SQLite（已内置在依赖中，无需单独安装）
-- 各API的密钥（Firecrawl、Serper、OpenAI等）
+- Ollama（本地LLM，免费）⭐ 推荐
+- 各API的密钥（可选：Firecrawl、Serper等）
 
 ### 2. 安装依赖
 
@@ -62,22 +115,64 @@
 git clone <项目地址>
 cd Competitive_go
 
+# 设置Go代理（国内必需）
+go env -w GOPROXY=https://goproxy.cn,direct
+
 # 安装Go依赖
 go mod download
 ```
 
 ### 3. 配置环境变量
 
-复制 `.env.example` 为 `.env` 并填写配置：
+复制 `.env.ollama` 为 `.env`：
 
 ```bash
-cp .env.example .env
+cp .env.ollama .env
 ```
 
-编辑 `.env` 文件：
+**推荐配置** (Ollama本地LLM)：
 
 ```env
-# API Keys
+# Ollama本地LLM（完全免费）
+OPENAI_API_KEY=ollama
+OPENAI_BASE_URL=http://localhost:11434
+LLM_MODEL=qwen2.5:7b
+
+# 搜索API（可选）
+SERPER_API_KEY=你的密钥
+
+# 其他配置
+LLM_TEMPERATURE=0.3
+LLM_MAX_TOKENS=4000
+SERVER_PORT=8080
+```
+
+### 4. 安装Ollama
+
+**Windows**:
+```powershell
+# 下载安装
+# 访问: https://ollama.com/download/windows
+# 或使用 winget
+winget install Ollama.Ollama
+
+# 下载推荐模型
+ollama pull qwen2.5:7b
+```
+
+**Linux/Mac**:
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull qwen2.5:7b
+```
+
+### 5. 启动服务
+
+```bash
+go run main.go
+```
+
+看到 `服务器启动在端口 8080` 表示成功！
 FIRECRAWL_API_KEY=your_firecrawl_key_here
 SERPER_API_KEY=your_serper_key_here
 OPENAI_API_KEY=your_openai_key_here

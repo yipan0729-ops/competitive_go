@@ -854,7 +854,7 @@ competitors:
         "negative": 0.10
     },
     "rating": 4.5,
-    "review_count": 1200,
+    "review_count": 12000,
     "key_praise": ["优点1", "优点2", "优点3"],
     "key_complaints": ["缺点1", "缺点2"],
     "common_keywords": ["易用", "功能强大", "价格贵"]

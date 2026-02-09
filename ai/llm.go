@@ -108,7 +108,8 @@ func (c *LLMClient) Chat(messages []ChatMessage) (string, error) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.APIKey)
 
-	client := &http.Client{Timeout: 120 * time.Second}
+	// 增加超时时间，特别是对于推理模型（如DeepSeek-R1）
+	client := &http.Client{Timeout: 12000 * time.Second} // 20分钟超时
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("请求失败: %w", err)
@@ -169,7 +170,7 @@ func (c *LLMClient) chatWithOllama(messages []ChatMessage) (string, error) {
 
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: 300 * time.Second} // Ollama可能较慢，增加超时时间
+	client := &http.Client{Timeout: 12000 * time.Second} // Ollama可能较慢，增加超时时间
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("请求Ollama失败: %w (请确保Ollama服务正在运行)", err)
@@ -216,11 +217,31 @@ func (c *LLMClient) CompletionWithJSON(systemPrompt, userPrompt string) (map[str
 		return nil, err
 	}
 
+	// 清理响应，移除markdown代码块标记
+	jsonContent := extractJSONFromMarkdown(response)
+
 	// 解析JSON
 	var result map[string]interface{}
-	if err := json.Unmarshal([]byte(response), &result); err != nil {
+	if err := json.Unmarshal([]byte(jsonContent), &result); err != nil {
 		return nil, fmt.Errorf("解析JSON响应失败: %w", err)
 	}
 
 	return result, nil
+}
+
+// extractJSONFromMarkdown 从markdown代码块中提取JSON内容
+func extractJSONFromMarkdown(content string) string {
+	// 移除markdown代码块标记（```json 或 ```）
+	content = strings.TrimSpace(content)
+	
+	// 如果以```开头
+	if strings.HasPrefix(content, "```") {
+		lines := strings.Split(content, "\n")
+		if len(lines) > 2 {
+			// 移除第一行（```json或```）和最后一行（```）
+			content = strings.Join(lines[1:len(lines)-1], "\n")
+		}
+	}
+	
+	return strings.TrimSpace(content)
 }
