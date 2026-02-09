@@ -4,7 +4,7 @@ import (
 	"competitive-analyzer/models"
 	"log"
 
-	"gorm.io/driver/sqlite"
+	"github.com/glebarez/sqlite" // 纯Go SQLite驱动，无需CGO
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
